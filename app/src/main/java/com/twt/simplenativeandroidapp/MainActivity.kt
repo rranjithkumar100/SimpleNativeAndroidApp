@@ -14,6 +14,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.twt.simplenativeandroidapp.ui.theme.SimpleNativeAndroidAppTheme
 
 class MainActivity : ComponentActivity() {
+
+    init {
+        System.loadLibrary("simplenativeandroidapp")
+    }
+
+    private external fun stringFromJNI(): String
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -21,7 +28,7 @@ class MainActivity : ComponentActivity() {
             SimpleNativeAndroidAppTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     Greeting(
-                        name = "Android",
+                        name = stringFromJNI(),
                         modifier = Modifier.padding(innerPadding)
                     )
                 }
