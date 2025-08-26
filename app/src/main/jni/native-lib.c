@@ -57,26 +57,18 @@ static size_t pkcs7_unpad(uint8_t* data, size_t len) {
         return 0;
     }
 
-    // The last byte is the padding length
     uint8_t pad_len = data[len - 1];
 
-    // Padding length must be between 1 and AES_BLOCKLEN (16)
-    // and not greater than the total length.
     if (pad_len > AES_BLOCKLEN || pad_len == 0 || pad_len > len) {
-        // This is not valid padding. Return original length.
-        // Or handle as an error. For this case, we assume it's not padded.
         return len;
     }
 
-    // Check if all padding bytes are correct
     for (size_t i = len - pad_len; i < len; ++i) {
         if (data[i] != pad_len) {
-            // Padding is malformed.
             return len;
         }
     }
 
-    // Return the new length, excluding padding.
     return len - pad_len;
 }
 
