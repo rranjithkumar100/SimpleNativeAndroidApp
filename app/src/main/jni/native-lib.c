@@ -99,7 +99,7 @@ Java_com_twt_simplenativeandroidapp_MainActivity_validateLicense(
     const char *encrypted_license_b64 = (*env)->GetStringUTFChars(env, encrypted_license_jstr, 0);
 
     // 1. Set the key
-    const char* key_str = "a-super-secret-key-for-aes-256!";
+    const char* key_str = "a-super-secret-key-for-aes-256!!";
     uint8_t final_key[32];
     memcpy(final_key, key_str, 32);
     print_hex("AES Key", final_key, 32);

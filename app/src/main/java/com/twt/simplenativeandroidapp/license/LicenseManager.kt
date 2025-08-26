@@ -8,7 +8,7 @@ import javax.crypto.spec.SecretKeySpec
 
 object LicenseManager {
     // A single, hardcoded 32-byte key for AES-256.
-    private val AES_KEY = "a-super-secret-key-for-aes-256!".toByteArray(Charsets.UTF_8)
+    private val AES_KEY = "a-super-secret-key-for-aes-256!!".toByteArray(Charsets.UTF_8)
 
     fun encryptLicense(license: License): String {
         val gson = Gson()
