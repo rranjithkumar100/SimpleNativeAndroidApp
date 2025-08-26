@@ -7,35 +7,15 @@ import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.SecretKeySpec
 
 object LicenseManager {
-    // This will be obfuscated
-    private val OBFUSCATED_KEY_PART = xor("this-is-a-hardcoded-key-part-1".toByteArray(Charsets.UTF_8), "a-super-secret-xor-key".toByteArray(Charsets.UTF_8))
-    private const val SERVER_KEY_PART = "this-is-a-server-key-part-2"
-
-    private fun xor(a: ByteArray, key: ByteArray): ByteArray {
-        val out = ByteArray(a.size)
-        for (i in a.indices) {
-            out[i] = (a[i].toInt() xor key[i % key.size].toInt()).toByte()
-        }
-        return out
-    }
-
-    private fun getFullKey(): ByteArray {
-        val deobfuscatedKeyPart = xor(OBFUSCATED_KEY_PART, "a-super-secret-xor-key".toByteArray(Charsets.UTF_8))
-        val serverKeyPartBytes = SERVER_KEY_PART.toByteArray(Charsets.UTF_8)
-
-        val key = deobfuscatedKeyPart.copyOf() // Make a copy to modify
-        for (i in serverKeyPartBytes.indices) {
-            key[i] = (key[i].toInt() xor serverKeyPartBytes[i].toInt()).toByte()
-        }
-        return key.copyOf(32) // Return a 32-byte key
-    }
+    // A single, hardcoded 32-byte key for AES-256.
+    private val AES_KEY = "a-super-secret-key-for-aes-256!".toByteArray(Charsets.UTF_8)
 
     fun encryptLicense(license: License): String {
         val gson = Gson()
         val licenseJson = gson.toJson(license)
 
-        val key = getFullKey()
-        val iv = ByteArray(16) // For simplicity, using a zero IV. In a real scenario, a random IV should be generated and prepended to the ciphertext.
+        val key = AES_KEY
+        val iv = ByteArray(16) // For simplicity, using a zero IV.
         val secretKeySpec = SecretKeySpec(key, "AES")
         val ivParameterSpec = IvParameterSpec(iv)
 

@@ -22,7 +22,7 @@ class MainActivity : ComponentActivity() {
     }
 
     private external fun stringFromJNI(): String
-    private external fun validateLicense(encryptedLicense: String, serverKeyPart: String): Boolean
+    private external fun validateLicense(encryptedLicense: String): Boolean
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,9 +36,7 @@ class MainActivity : ComponentActivity() {
         )
 
         val encryptedLicense = LicenseManager.encryptLicense(license)
-        val serverKeyPart = "this-is-a-server-key-part-2"
-
-        val isLicenseValid = validateLicense(encryptedLicense, serverKeyPart)
+        val isLicenseValid = validateLicense(encryptedLicense)
 
         setContent {
             SimpleNativeAndroidAppTheme {
