@@ -12,10 +12,8 @@
 #define B_BASE 3
 #define B64_PAD_CHAR '='
 #define ASCII_RANGE 256
-#define calc_b64_encoding_size(l) (((B_FACTOR * l / B_BASE) + B_BASE) & ~B_BASE)
- + 1
-#define calc_b64_decoding_size(l) (((B_BASE * l / B_FACTOR) + B_BASE) & ~B_BASE)
- + 1
+#define calc_b64_encoding_size(l) (((B_FACTOR * l / B_BASE) + B_BASE) & ~B_BASE) + 1
+#define calc_b64_decoding_size(l) (((B_BASE * l / B_FACTOR) + B_BASE) & ~B_BASE) + 1
 #define B_TABLE_SIZE 64
 
 typedef char b64_encoded_t;
