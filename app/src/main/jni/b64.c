@@ -52,8 +52,7 @@ b64_decoded_t* decode_base64(const char *input) {
     }
 
     b64_required_storage_size_t r_storage = calc_b64_decoding_size(input_len);
-    b64_decoded_t *b_out = (b64_decoded_t*)calloc(r_storage, sizeof(b64_decoded_
-t));
+    b64_decoded_t *b_out = (b64_decoded_t*)calloc(r_storage, sizeof(b64_decoded_t));
     if (!b_out) return NULL;
 
     for (size_t i = 0, c = 0; i < input_len; i += 4) {
@@ -80,8 +79,7 @@ b64_encoded_t* encode_base_64(const char *input) {
     size_t input_len = strlen(input);
     b64_encoding_padding_t padding = get_encoding_offset(input_len);
     b64_required_storage_size_t r_storage = calc_b64_encoding_size(input_len);
-    b64_encoded_t *b_out = (b64_encoded_t*)calloc(r_storage + 1, sizeof(b64_enco
-ded_t));
+    b64_encoded_t *b_out = (b64_encoded_t*)calloc(r_storage + 1, sizeof(b64_encoded_t));
     if (!b_out) return NULL;
 
     for(int i = 0, c =0; i < (input_len); i+= 3) {

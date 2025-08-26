@@ -44,8 +44,7 @@ NOTE:   String length must be evenly divisible by 16byte (str_len % 16 == 0)
 /*****************************************************************************/
 /* Defines:                                                                  */
 /*****************************************************************************/
-// The number of columns comprising a state in AES. This is a constant in AES. V
-alue=4
+// The number of columns comprising a state in AES. This is a constant in AES. Value=4
 #define Nb 4
 
 #if defined(AES256) && (AES256 == 1)
@@ -61,8 +60,7 @@ alue=4
 
 // jcallan@github points out that declaring Multiply as a function
 // reduces code size considerably with the Keil ARM compiler.
-// See this link for more information: https://github.com/kokke/tiny-AES-C/pull/
-3
+// See this link for more information: https://github.com/kokke/tiny-AES-C/pull/3
 #ifndef MULTIPLY_AS_A_FUNCTION
   #define MULTIPLY_AS_A_FUNCTION 0
 #endif
@@ -78,14 +76,11 @@ typedef uint8_t state_t[4][4];
 
 
 
-// The lookup-tables are marked const so they can be placed in read-only storage
- instead of RAM
+// The lookup-tables are marked const so they can be placed in read-only storageinstead of RAM
 // The numbers below can be computed dynamically trading ROM for RAM -
-// This can be useful in (embedded) bootloader applications, where ROM is often
-limited.
+// This can be useful in (embedded) bootloader applications, where ROM is oftenlimited.
 static const uint8_t sbox[256] = {
-  //0     1    2      3     4    5     6     7      8    9     A      B    C
- D     E     F
+  //0     1    2      3     4    5     6     7      8    9     A      B    C D     E     F
   0x63, 0x7c, 0x77, 0x7b, 0xf2, 0x6b, 0x6f, 0xc5, 0x30, 0x01, 0x67, 0x2b, 0xfe,
 0xd7, 0xab, 0x76,
   0xca, 0x82, 0xc9, 0x7d, 0xfa, 0x59, 0x47, 0xf0, 0xad, 0xd4, 0xa2, 0xaf, 0x9c,
@@ -156,8 +151,7 @@ static const uint8_t rsbox[256] = {
 #endif
 
 // The round constant word array, Rcon[i], contains the values given by
-// x to the power (i-1) being powers of x (x is denoted as {02}) in the field GF
-(2^8)
+// x to the power (i-1) being powers of x (x is denoted as {02}) in the field GF (2^8)
 static const uint8_t Rcon[11] = {
   0x8d, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1b, 0x36 };
 
@@ -188,8 +182,7 @@ static uint8_t getSBoxValue(uint8_t num)
 */
 #define getSBoxValue(num) (sbox[(num)])
 
-// This function produces Nb(Nr+1) round keys. The round keys are used in each r
-ound to decrypt the states.
+// This function produces Nb(Nr+1) round keys. The round keys are used in each round to decrypt the states.
 static void KeyExpansion(uint8_t* RoundKey, const uint8_t* Key)
 {
   unsigned i, j, k;
@@ -352,22 +345,16 @@ static void MixColumns(state_t* state)
   {
     t   = (*state)[i][0];
     Tmp = (*state)[i][0] ^ (*state)[i][1] ^ (*state)[i][2] ^ (*state)[i][3] ;
-    Tm  = (*state)[i][0] ^ (*state)[i][1] ; Tm = xtime(Tm);  (*state)[i][0] ^= T
-m ^ Tmp ;
-    Tm  = (*state)[i][1] ^ (*state)[i][2] ; Tm = xtime(Tm);  (*state)[i][1] ^= T
-m ^ Tmp ;
-    Tm  = (*state)[i][2] ^ (*state)[i][3] ; Tm = xtime(Tm);  (*state)[i][2] ^= T
-m ^ Tmp ;
-    Tm  = (*state)[i][3] ^ t ;              Tm = xtime(Tm);  (*state)[i][3] ^= T
-m ^ Tmp ;
+    Tm  = (*state)[i][0] ^ (*state)[i][1] ; Tm = xtime(Tm);  (*state)[i][0] ^= Tm ^ Tmp ;
+    Tm  = (*state)[i][1] ^ (*state)[i][2] ; Tm = xtime(Tm);  (*state)[i][1] ^= Tm ^ Tmp ;
+    Tm  = (*state)[i][2] ^ (*state)[i][3] ; Tm = xtime(Tm);  (*state)[i][2] ^= Tm ^ Tmp ;
+    Tm  = (*state)[i][3] ^ t ;              Tm = xtime(Tm);  (*state)[i][3] ^= Tm ^ Tmp ;
   }
 }
 
 // Multiply is used to multiply numbers in the field GF(2^8)
-// Note: The last call to xtime() is unneeded, but often ends up generating a sm
-aller binary
-//       The compiler seems to be able to vectorize the operation better this wa
-y.
+// Note: The last call to xtime() is unneeded, but often ends up generating a smaller binary
+//       The compiler seems to be able to vectorize the operation better this way.
 //       See https://github.com/kokke/tiny-AES-c/pull/34
 #if MULTIPLY_AS_A_FUNCTION
 static uint8_t Multiply(uint8_t x, uint8_t y)
@@ -399,8 +386,7 @@ static uint8_t getSBoxInvert(uint8_t num)
 #define getSBoxInvert(num) (rsbox[(num)])
 
 // MixColumns function mixes the columns of the state matrix.
-// The method used to multiply may be difficult to understand for the inexperien
-ced.
+// The method used to multiply may be difficult to understand for the inexperienced.
 // Please use the references to gain more information.
 static void InvMixColumns(state_t* state)
 {
@@ -528,15 +514,13 @@ static void InvCipher(state_t* state, const uint8_t* RoundKey)
 
 void AES_ECB_encrypt(const struct AES_ctx* ctx, uint8_t* buf)
 {
-  // The next function call encrypts the PlainText with the Key using AES algori
-thm.
+  // The next function call encrypts the PlainText with the Key using AES algorithm.
   Cipher((state_t*)buf, ctx->RoundKey);
 }
 
 void AES_ECB_decrypt(const struct AES_ctx* ctx, uint8_t* buf)
 {
-  // The next function call decrypts the PlainText with the Key using AES algori
-thm.
+  // The next function call decrypts the PlainText with the Key using AES algorithm.
   InvCipher((state_t*)buf, ctx->RoundKey);
 }
 
@@ -553,8 +537,7 @@ thm.
 static void XorWithIv(uint8_t* buf, const uint8_t* Iv)
 {
   uint8_t i;
-  for (i = 0; i < AES_BLOCKLEN; ++i) // The block in AES is always 128bit no mat
-ter the key size
+  for (i = 0; i < AES_BLOCKLEN; ++i) // The block in AES is always 128bit no matter the key size
   {
     buf[i] ^= Iv[i];
   }
