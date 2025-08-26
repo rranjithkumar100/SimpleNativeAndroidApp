@@ -97,18 +97,10 @@ Java_com_twt_simplenativeandroidapp_MainActivity_validateLicense(
 
     // 1. Reconstruct the key
     const char* hardcoded_key_part_str = "this-is-a-hardcoded-key-part-1";
-    size_t hardcoded_key_part_len = strlen(hardcoded_key_part_str);
-    const char* xor_key_str = "a-super-secret-xor-key";
-    size_t xor_key_len = strlen(xor_key_str);
-
-    uint8_t deobfuscated_key_part[32];
-    xor((const uint8_t*)hardcoded_key_part_str, hardcoded_key_part_len, (const uint8_t*)xor_key_str, xor_key_len, deobfuscated_key_part);
+    uint8_t final_key[32];
+    memcpy(final_key, hardcoded_key_part_str, 32);
 
     size_t server_key_part_len = strlen(server_key_part);
-
-    uint8_t final_key[32];
-    memcpy(final_key, deobfuscated_key_part, 32);
-
     for (size_t i = 0; i < server_key_part_len; ++i) {
         final_key[i] ^= (uint8_t)server_key_part[i];
     }
