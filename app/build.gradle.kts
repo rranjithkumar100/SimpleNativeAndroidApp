@@ -6,7 +6,7 @@ plugins {
 
 android {
     namespace = "com.twt.simplenativeandroidapp"
-    compileSdk = 36
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.twt.simplenativeandroidapp"

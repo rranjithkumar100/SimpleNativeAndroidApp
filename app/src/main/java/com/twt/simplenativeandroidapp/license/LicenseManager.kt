@@ -21,8 +21,13 @@ object LicenseManager {
 
     private fun getFullKey(): ByteArray {
         val deobfuscatedKeyPart = xor(OBFUSCATED_KEY_PART, "a-super-secret-xor-key".toByteArray(Charsets.UTF_8))
-        val fullKey = deobfuscatedKeyPart.toString(Charsets.UTF_8) + SERVER_KEY_PART
-        return fullKey.toByteArray(Charsets.UTF_8).copyOf(32) // AES-256 key
+        val serverKeyPartBytes = SERVER_KEY_PART.toByteArray(Charsets.UTF_8)
+
+        val key = deobfuscatedKeyPart.copyOf() // Make a copy to modify
+        for (i in serverKeyPartBytes.indices) {
+            key[i] = (key[i].toInt() xor serverKeyPartBytes[i].toInt()).toByte()
+        }
+        return key.copyOf(32) // Return a 32-byte key
     }
 
     fun encryptLicense(license: License): String {

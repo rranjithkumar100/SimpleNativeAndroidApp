@@ -23,6 +23,22 @@ long long current_time_millis() {
     return (long long)tv.tv_sec * 1000 + (long long)tv.tv_usec / 1000;
 }
 
+static size_t b64_decoded_size(const char *in) {
+    size_t len = strlen(in);
+    if (len % 4 != 0) return 0; // Invalid length
+
+    size_t ret = len / 4 * 3;
+
+    if (in[len - 1] == '=') {
+        ret--;
+    }
+    if (in[len - 2] == '=') {
+        ret--;
+    }
+
+    return ret;
+}
+
 JNIEXPORT jstring JNICALL
 Java_com_twt_simplenativeandroidapp_MainActivity_stringFromJNI(
         JNIEnv* env,
@@ -60,15 +76,24 @@ Java_com_twt_simplenativeandroidapp_MainActivity_validateLicense(
     uint8_t deobfuscated_key_part[32];
     xor((const uint8_t*)hardcoded_key_part_str, hardcoded_key_part_len, (const uint8_t*)xor_key_str, xor_key_len, deobfuscated_key_part);
 
-    char full_key_str[64];
-    memcpy(full_key_str, deobfuscated_key_part, hardcoded_key_part_len);
-    full_key_str[hardcoded_key_part_len] = '\0'; // Null-terminate the deobfuscated part
-    strcat(full_key_str, server_key_part);
+    size_t server_key_part_len = strlen(server_key_part);
 
-    uint8_t full_key[32];
-    memcpy(full_key, full_key_str, 32);
+    uint8_t final_key[32];
+    memcpy(final_key, deobfuscated_key_part, 32);
+
+    for (size_t i = 0; i < server_key_part_len; ++i) {
+        final_key[i] ^= (uint8_t)server_key_part[i];
+    }
 
     // 2. Base64 decode the license
+    size_t decoded_len = b64_decoded_size(encrypted_license_b64);
+    if (decoded_len == 0) {
+        LOGI("Base64 decoding failed: invalid length");
+        (*env)->ReleaseStringUTFChars(env, encrypted_license_jstr, encrypted_license_b64);
+        (*env)->ReleaseStringUTFChars(env, server_key_part_jstr, server_key_part);
+        return JNI_FALSE;
+    }
+
     b64_decoded_t *encrypted_license = decode_base64(encrypted_license_b64);
     if (encrypted_license == NULL) {
         LOGI("Base64 decoding failed");
@@ -76,16 +101,15 @@ Java_com_twt_simplenativeandroidapp_MainActivity_validateLicense(
         (*env)->ReleaseStringUTFChars(env, server_key_part_jstr, server_key_part);
         return JNI_FALSE;
     }
-    size_t encrypted_license_len = strlen((char*)encrypted_license);
-
 
     // 3. Decrypt the license
     struct AES_ctx ctx;
     uint8_t iv[AES_BLOCKLEN] = {0};
-    AES_init_ctx_iv(&ctx, full_key, iv);
-    AES_CBC_decrypt_buffer(&ctx, (uint8_t*)encrypted_license, encrypted_license_len);
+    AES_init_ctx_iv(&ctx, final_key, iv);
+    AES_CBC_decrypt_buffer(&ctx, (uint8_t*)encrypted_license, decoded_len);
 
     char* decrypted_license_json = (char*)encrypted_license;
+    decrypted_license_json[decoded_len] = '\0'; // Null-terminate the decrypted string
     LOGI("Decrypted license: %s", decrypted_license_json);
 
 
