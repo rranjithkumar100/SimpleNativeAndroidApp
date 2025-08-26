@@ -1,6 +1,7 @@
 package com.twt.simplenativeandroidapp
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -21,6 +22,7 @@ class MainActivity : ComponentActivity() {
         System.loadLibrary("simplenativeandroidapp")
     }
 
+    private  val TAG = "MainActivity"
     private external fun stringFromJNI(): String
     private external fun validateLicense(encryptedLicense: String): Boolean
 
@@ -36,6 +38,7 @@ class MainActivity : ComponentActivity() {
         )
 
         val encryptedLicense = LicenseManager.encryptLicense(license)
+        Log.d(TAG, "onCreate: encryptedLicense "+encryptedLicense)
         val isLicenseValid = validateLicense(encryptedLicense)
 
         setContent {
