@@ -52,6 +52,34 @@ jboolean checkSignature(JNIEnv* env, jobject thiz) {
     return JNI_TRUE;
 }
 
+static size_t pkcs7_unpad(uint8_t* data, size_t len) {
+    if (len == 0) {
+        return 0;
+    }
+
+    // The last byte is the padding length
+    uint8_t pad_len = data[len - 1];
+
+    // Padding length must be between 1 and AES_BLOCKLEN (16)
+    // and not greater than the total length.
+    if (pad_len > AES_BLOCKLEN || pad_len == 0 || pad_len > len) {
+        // This is not valid padding. Return original length.
+        // Or handle as an error. For this case, we assume it's not padded.
+        return len;
+    }
+
+    // Check if all padding bytes are correct
+    for (size_t i = len - pad_len; i < len; ++i) {
+        if (data[i] != pad_len) {
+            // Padding is malformed.
+            return len;
+        }
+    }
+
+    // Return the new length, excluding padding.
+    return len - pad_len;
+}
+
 JNIEXPORT jboolean JNICALL
 Java_com_twt_simplenativeandroidapp_MainActivity_validateLicense(
         JNIEnv* env,
@@ -108,9 +136,12 @@ Java_com_twt_simplenativeandroidapp_MainActivity_validateLicense(
     AES_init_ctx_iv(&ctx, final_key, iv);
     AES_CBC_decrypt_buffer(&ctx, (uint8_t*)encrypted_license, decoded_len);
 
+    // Remove PKCS#7 padding
+    size_t unpadded_len = pkcs7_unpad((uint8_t*)encrypted_license, decoded_len);
+
     char* decrypted_license_json = (char*)encrypted_license;
-    decrypted_license_json[decoded_len] = '\0'; // Null-terminate the decrypted string
-    LOGI("Decrypted license: %s", decrypted_license_json);
+    decrypted_license_json[unpadded_len] = '\0'; // Null-terminate the unpadded string
+    LOGI("Decrypted license (len=%zu): %s", unpadded_len, decrypted_license_json);
 
 
     // 4. Validate the license
